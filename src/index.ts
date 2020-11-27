@@ -7,13 +7,16 @@ export class AsyncEventEmitter {
 
   off(event: string | symbol, listener?: Listener) {
     if (listener) {
-      return this.eventEmitter.off(event, listener);
+      this.eventEmitter.off(event, listener);
+    } else {
+      this.eventEmitter.removeAllListeners(event);
     }
-    return this.eventEmitter.removeAllListeners(event);
+    return this;
   }
 
   on(event: string | symbol, listener: Listener) {
-    return this.eventEmitter.on(event, listener);
+    this.eventEmitter.on(event, listener);
+    return this;
   }
 
   async emit(event: string | symbol, ...args: any) {
