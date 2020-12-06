@@ -1,6 +1,7 @@
 import { EventEmitter } from "events";
 
 export type Listener = (...args: any) => void | Promise<void>;
+export type Receiver = (...args: any) => any;
 
 export type AsyncEventOptions = {
   prefix?: string;
@@ -8,6 +9,7 @@ export type AsyncEventOptions = {
 
 export class AsyncEventEmitter {
   protected eventEmitter = new EventEmitter();
+  protected receivers = new Map<string, Receiver>();
 
   constructor(protected readonly options?: AsyncEventOptions) {}
 
@@ -17,6 +19,22 @@ export class AsyncEventEmitter {
       return p + event;
     }
     return event;
+  }
+
+  call<T = any>(event: string, ...args: any): T | void {
+    const r = this.receivers.get(event);
+    if (r) {
+      return r(...args);
+    }
+  }
+
+  receive(event: string, receiver: Receiver) {
+    if (this.receivers.get(event)) {
+      throw new Error("can only one receiver");
+    }
+
+    this.receivers.set(event, receiver);
+    return this;
   }
 
   off(event: string, listener?: Listener) {
